@@ -5,7 +5,7 @@ from PyQt5.QtWidgets import QMainWindow, QInputDialog, QMessageBox
 class AddTest(QMainWindow):
     def __init__(self, con, cur):
         super().__init__()
-        uic.loadUi('AddTestInterface.ui', self)
+        uic.loadUi('interface/AddTestInterface.ui', self)
         self.con = con
         self.cur = cur
         self.initUI()

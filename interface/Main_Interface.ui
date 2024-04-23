@@ -137,12 +137,12 @@
     </property>
     <item>
      <property name="text">
-      <string>Id</string>
+      <string>Названию</string>
      </property>
     </item>
     <item>
      <property name="text">
-      <string>Названию</string>
+      <string>Id</string>
      </property>
     </item>
     <item>

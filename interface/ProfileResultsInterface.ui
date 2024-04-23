@@ -6,72 +6,19 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>544</width>
-    <height>418</height>
+    <width>556</width>
+    <height>423</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Результаты прохождения</string>
+   <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralwidget">
-   <widget class="QPushButton" name="SearchPB">
-    <property name="geometry">
-     <rect>
-      <x>390</x>
-      <y>10</y>
-      <width>61</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Найти:</string>
-    </property>
-   </widget>
-   <widget class="QLineEdit" name="SearchStr">
-    <property name="geometry">
-     <rect>
-      <x>180</x>
-      <y>10</y>
-      <width>201</width>
-      <height>31</height>
-     </rect>
-    </property>
-   </widget>
-   <widget class="QComboBox" name="SearchCB">
-    <property name="geometry">
-     <rect>
-      <x>80</x>
-      <y>10</y>
-      <width>91</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <item>
-     <property name="text">
-      <string>Пользователю</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Названию</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Id теста</string>
-     </property>
-    </item>
-    <item>
-     <property name="text">
-      <string>Предмету</string>
-     </property>
-    </item>
-   </widget>
    <widget class="QLabel" name="label">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>20</y>
+      <x>30</x>
+      <y>30</y>
       <width>61</width>
       <height>20</height>
      </rect>
@@ -80,20 +27,76 @@
      <string>Поиск по:</string>
     </property>
    </widget>
+   <widget class="QLineEdit" name="SearchStr">
+    <property name="geometry">
+     <rect>
+      <x>190</x>
+      <y>20</y>
+      <width>201</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="SearchPB">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>20</y>
+      <width>61</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Найти:</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="SearchCB">
+    <property name="geometry">
+     <rect>
+      <x>90</x>
+      <y>20</y>
+      <width>91</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Названию</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Id</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Предмету</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QPushButton" name="UpdatePB">
+    <property name="geometry">
+     <rect>
+      <x>470</x>
+      <y>20</y>
+      <width>61</width>
+      <height>31</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Обновить</string>
+    </property>
+   </widget>
    <widget class="QTableWidget" name="tableWidget">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>60</y>
+      <x>20</x>
+      <y>70</y>
       <width>511</width>
       <height>281</height>
      </rect>
     </property>
-    <column>
-     <property name="text">
-      <string>Пользователь</string>
-     </property>
-    </column>
     <column>
      <property name="text">
       <string>Id теста</string>
@@ -106,6 +109,11 @@
     </column>
     <column>
      <property name="text">
+      <string>Предмет</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
       <string>Результат, %</string>
      </property>
     </column>
@@ -114,19 +122,11 @@
       <string>Дата прохождения</string>
      </property>
     </column>
-   </widget>
-   <widget class="QPushButton" name="UpdatePB">
-    <property name="geometry">
-     <rect>
-      <x>460</x>
-      <y>10</y>
-      <width>61</width>
-      <height>31</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Обновить</string>
-    </property>
+    <column>
+     <property name="text">
+      <string>Ваши ответы</string>
+     </property>
+    </column>
    </widget>
   </widget>
   <widget class="QMenuBar" name="menubar">
@@ -134,7 +134,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>544</width>
+     <width>556</width>
      <height>21</height>
     </rect>
    </property>

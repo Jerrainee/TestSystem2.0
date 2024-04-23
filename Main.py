@@ -8,6 +8,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from AddTest import AddTest
 from DeleteTest import DeleteTest
 from EditSubject import EditSubject
+from ProfileResults import ShowProfileResults
 from ShowResults import ShowResults
 from TestRun import TestRun
 from Account import Account
@@ -55,11 +56,11 @@ class Main(QMainWindow):
 
     def search_test(self):
         text = str(self.SearchStr.text())
-        lst1 = ['Id', 'Названию', 'Предмету']
-        lst2 = ['tests.ID', 'tests.Name', 'Subjects.Subject']
+        lst1 = ['Названию', 'Id', 'Предмету']
+        lst2 = ['tests.Name', 'tests.ID', 'Subjects.Subject']
         column = str(lst2[lst1.index(self.SearchCB.currentText())])
-        self.query += f" where {column} like '%{text}%'"
-        data = self.cur.execute(self.query)
+        cur_query = self.query + f" where {column} like '%{text}%'"
+        data = self.cur.execute(cur_query)
         self.update_table(data)
 
     def for_admin(self):
@@ -89,7 +90,7 @@ class Main(QMainWindow):
         self.tableWidget.sortItems(column)
 
     def check_account(self):
-        if self.account == '':
+        if not user.login:
             valid = QMessageBox.question(
                 self, '', 'Вы не вошли в аккаунт, результат прохождения не будет засчитан. Продолжить?',
                 QMessageBox.Yes, QMessageBox.No)
@@ -105,7 +106,7 @@ class Main(QMainWindow):
             self, '', f'Вы уверенны, что хотите начать прохождение данного теста: {Name}?',
             QMessageBox.Yes, QMessageBox.No)
         if valid == QMessageBox.Yes:
-            self.dialog = TestRun(self.con, self.cur, self.RowsLst, self.account, Id, Name)
+            self.dialog = TestRun(self.con, self.cur, self.RowsLst, Id, Name, user)
             self.dialog.show()
 
     def reg_account(self):
@@ -160,7 +161,8 @@ class Main(QMainWindow):
             self.flash('Ошибка', 'Пользователь с таким логином не найден!')
 
     def profile(self):
-        pass
+        self.dialog = ShowProfileResults(self.con, self.cur, user)
+        self.dialog.show()
 
     def logout(self):
         user.id = ''
@@ -185,7 +187,6 @@ class Main(QMainWindow):
             self.ProfilePB.hide()
             self.LogoutPB.hide()
             self.AdminPB.hide()
-
 
     def flash(self, title, content):
         self.mbox.setWindowTitle(title)

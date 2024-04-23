@@ -1,15 +1,18 @@
 from PyQt5 import uic
 from PyQt5.QtWidgets import QMainWindow, QMessageBox
+import datetime
+
+from Account import Account
 
 
 class TestRun(QMainWindow):
-    def __init__(self, con, cur, RowsLst, account, Id, Name):
+    def __init__(self, con, cur, RowsLst, Id, Name, user):
         super().__init__()
         uic.loadUi('interface/TestRunInterface.ui', self)
         self.con = con
         self.cur = cur
         self.RowsLst = RowsLst
-        self.account = account
+        self.user = user
         self.id = Id
         self.name = Name
         self.res_answers = []
@@ -53,6 +56,7 @@ class TestRun(QMainWindow):
     def save_answer(self):
         self.UserAnswers[self.QuestionNum] = self.lineEdit.text()
 
+
     def check_buttons(self):
         self.label.setText(f'Вопрос №{self.QuestionNum + 1} :')
         if self.QuestionNum == 0:
@@ -76,7 +80,10 @@ class TestRun(QMainWindow):
         if valid == QMessageBox.Yes:
             self.close()
             for i, answ in enumerate(self.AnswLst):
-                self.res_answers.append(self.UserAnswers[i])
+                if self.UserAnswers[i]:
+                    self.res_answers.append(self.UserAnswers[i])
+                else:
+                    self.res_answers.append('<None>')
                 if self.UserAnswers[i] == answ:
                     count += 1
             result = f'{(count / len(self.AnswLst) * 100):.0f}'
@@ -84,8 +91,12 @@ class TestRun(QMainWindow):
             self.mbox.setText(
                 f'Поздравляем, вы прошли тест на {count} / {len(self.AnswLst)}, {result}%')
             self.mbox.exec()
-            if self.account:
-                query = """ Insert into log(Name, Test_id, Test_name, Result, User_answers) Values(?, ?, ?, ?, ?)"""
+            if self.user:
+                q = f''' Select Subject_ID from tests where ID == {self.id}'''
+                cur_sub = self.cur.execute(q).fetchall()
+                query = """ Insert into log(User_login, Test_id, Test_name, Test_subject_id, Result, User_answers, date) Values(?, ?, ?, ?, ?, ?, ?)"""
+                print(self.res_answers)
                 self.cur.execute(query,
-                                 (self.account[0], self.id, self.name, result, ';;'.join(self.res_answers))).fetchall()
+                                 (self.user.login, self.id, self.name, cur_sub[0][0], result, ';;'.join(self.res_answers),
+                                  datetime.datetime.now())).fetchall()
                 self.con.commit()
