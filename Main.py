@@ -131,10 +131,14 @@ class Main(QMainWindow):
                 user.is_admin = 0
                 self.check_status()
 
-            else:
+            elif ok_pressed and password:
                 self.flash('Ошибка', 'Пароль должен содержать 8 или более символов')
-        else:
+            elif ok_pressed and not password:
+                self.flash('Ошибка', 'Пожалуйста, введите пароль')
+        elif ok_pressed and data:
             self.flash('Ошибка', 'Такой логин уже существует')
+        elif ok_pressed and not login:
+            self.flash('Ошибка', 'Введите логин')
 
     def log_in_account(self):
         login, ok_pressed = QInputDialog.getText(self, "Аккаунт",
@@ -155,10 +159,14 @@ class Main(QMainWindow):
                 user.hashed_password = data[0][2]
                 user.is_admin = data[0][3]
                 self.check_status()
-            else:
+            elif ok_pressed and not check_password_hash(data[0][2], password):
                 self.flash('Ошибка', 'Неверный пароль!')
-        else:
+            elif ok_pressed and not password:
+                self.flash('Ошибка', 'Пожалуйста, введите пароль')
+        elif ok_pressed and login and not data:
             self.flash('Ошибка', 'Пользователь с таким логином не найден!')
+        elif ok_pressed and not login:
+            self.flash('Ошибка', 'Пожалуйста, введите логин')
 
     def profile(self):
         self.dialog = ShowProfileResults(self.con, self.cur, user)

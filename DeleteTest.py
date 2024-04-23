@@ -25,8 +25,10 @@ class DeleteTest(QMainWindow):
                         self, '', f"Действительно удалить данный тест: {name} по предмету {subject}? ",
                         QMessageBox.Yes, QMessageBox.No)
                     if valid == QMessageBox.Yes:
-                        query = "DELETE FROM Tests WHERE Id= ?"
-                        self.cur.execute(query, (ID,)).fetchall()
+                        query = '''DELETE FROM Tests WHERE Id = ?'''
+                        self.cur.execute(query, (ID, )).fetchall()
+                        query2 = '''DELETE FROM Log WHERE Test_id = ?'''
+                        self.cur.execute(query2, (ID, )).fetchall()
                         self.con.commit()
                         self.flag = False
                 else:
