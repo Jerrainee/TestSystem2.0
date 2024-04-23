@@ -36,6 +36,6 @@ class ShowResults(QMainWindow):
         lst1 = ['Пользователю', 'Названию', 'Id теста', 'Предмету']
         lst2 = ['User_login', 'Test_name', 'Test_id', 'Subjects.Subject']
         column = str(lst2[lst1.index(self.SearchCB.currentText())])
-        cur_query = self.query + f' where {column} like %{text}%'
+        cur_query = self.query + f" where {column} like '%{text}%'"
         data = self.cur.execute(cur_query)
         self.result_update(data)

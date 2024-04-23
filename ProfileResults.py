@@ -30,7 +30,10 @@ class ShowProfileResults(QMainWindow):
         for i, row in enumerate(data):
             self.tableWidget.setRowCount(self.tableWidget.rowCount() + 1)
             for j, elem in enumerate(row):
-                self.tableWidget.setItem(i, j, QTableWidgetItem(str(elem)))
+                if j % 5 == 0:
+                    self.tableWidget.setItem(i, j, QTableWidgetItem(', '.join((str(elem)).split(';;'))))
+                else:
+                    self.tableWidget.setItem(i, j, QTableWidgetItem(str(elem)))
         self.tableWidget.resizeColumnsToContents()
 
     def search_test(self):
@@ -38,6 +41,6 @@ class ShowProfileResults(QMainWindow):
         lst1 = ['Названию', 'Id', 'Предмету']
         lst2 = ['Test_name', 'Test_id', 'Subjects.Subject']
         column = str(lst2[lst1.index(self.SearchCB.currentText())])
-        cur_query = self.query + f' Where {column} like %{text}%'
-        data = self.cur.execute(cur_query)
+        cur_query = self.query + f" and {column} like '%{text}%'"
+        data = self.cur.execute(cur_query, (self.user.login,)).fetchall()
         self.result_update(data)
