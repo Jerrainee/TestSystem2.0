@@ -3,12 +3,14 @@ import sys
 import sqlite3
 from PyQt5 import uic
 from PyQt5.QtWidgets import QApplication, QMainWindow, QTableWidgetItem, QInputDialog, QMessageBox, QTableWidget
+from werkzeug.security import generate_password_hash, check_password_hash
 
 from AddTest import AddTest
 from DeleteTest import DeleteTest
 from EditSubject import EditSubject
 from ShowResults import ShowResults
 from TestRun import TestRun
+from Account import Account
 
 
 class Main(QMainWindow):
@@ -18,12 +20,13 @@ class Main(QMainWindow):
         self.initUI()
 
     def initUI(self):
-        self.account = ''
         self.mbox = QMessageBox(self)
         self.UpdatePB.clicked.connect(self.default_query)
         self.AdminPB.clicked.connect(self.for_admin)
-        self.AdminPB.hide()
         self.LoginPB.clicked.connect(self.log_in_account)
+        self.RegisterPB.clicked.connect(self.reg_account)
+        self.LogoutPB.clicked.connect(self.logout)
+        self.ProfilePB.clicked.connect(self.profile)
         self.SortingCB.currentTextChanged.connect(self.sort_table)
         self.SearchPB.clicked.connect(self.search_test)
         self.tableWidget.itemDoubleClicked.connect(self.check_account)
@@ -31,6 +34,7 @@ class Main(QMainWindow):
         self.con = sqlite3.connect('db/TestSystemDB.db3')
         self.cur = self.con.cursor()
         self.RowsLst = []
+        self.check_status()
         self.default_query()
 
     def default_query(self):
@@ -104,53 +108,93 @@ class Main(QMainWindow):
             self.dialog = TestRun(self.con, self.cur, self.RowsLst, self.account, Id, Name)
             self.dialog.show()
 
+    def reg_account(self):
+        login, ok_pressed = QInputDialog.getText(self, "Аккаунт",
+                                                 "Пожалуйста, придумайте ваш логин:")
+
+        query = '''Select login From accounts where login = ?'''
+        data = self.cur.execute(query, (login,)).fetchall()
+
+        if login and ok_pressed and not data:
+            password, ok_pressed = QInputDialog.getText(self, "Аккаунт",
+                                                        f"Добро пожаловать, {login}, пожалуйста, придумайте пароль:")
+            if ok_pressed and len(password) >= 8:
+                psw = generate_password_hash(password)
+
+                query = '''Insert into Accounts(login, password, status) values(?, ?, ?)'''
+                self.cur.execute(query, (login, psw, 0))
+                self.con.commit()
+                self.flash('Успех', 'Аккаунт зарегистрирован')
+                user.login = login
+                user.hashed_password = psw
+                user.is_admin = 0
+                self.check_status()
+
+            else:
+                self.flash('Ошибка', 'Пароль должен содержать 8 или более символов')
+        else:
+            self.flash('Ошибка', 'Такой логин уже существует')
+
     def log_in_account(self):
         login, ok_pressed = QInputDialog.getText(self, "Аккаунт",
                                                  "Пожалуйста, введите ваш логин:")
-        if ok_pressed and login:
-            query = '''Select login From accounts where login = ?'''
-            data = self.cur.execute(query, (login,)).fetchall()
-            if data:
-                password, ok_pressed = QInputDialog.getText(self, "Аккаунт",
-                                                            f"Добро пожаловать, {login}, пожалуйста, введите ваш пароль:")
-                if ok_pressed and password:
-                    query = '''Select login From accounts where password = ?'''
-                    data = self.cur.execute(query, (password,)).fetchall()
-                    check = ''.join([str(i)[2:-3] for i in data])
-                    if check == login:
-                        self.mbox.setWindowTitle('Успех')
-                        self.mbox.setText('Вы успешно вошли в свой аккаунт.')
-                        self.mbox.exec()
-                        query = f'''Select login, password, status From accounts where login = {str(data)[2:-3]}'''
-                        account_turple = (self.cur.execute(query).fetchall())
-                        self.account = [elem for elem in account_turple[0]]
-                        self.AccountStr.setText(f'Добро пожаловать, {self.account[0]}')
-                        self.check_status()
-                    else:
-                        self.mbox.setWindowTitle('Ошибка')
-                        self.mbox.setText('Неправильный пароль.')
-                        self.mbox.exec()
-                elif ok_pressed and password == '':
-                    self.mbox.setWindowTitle('Ошибка')
-                    self.mbox.setText('Пожалуйста, введите ваш пароль.')
-                    self.mbox.exec()
+
+        query = '''Select * From accounts where login = ?'''
+        data = self.cur.execute(query, (login,)).fetchall()
+
+        if ok_pressed and login and data:
+
+            password, ok_pressed = QInputDialog.getText(self, "Аккаунт",
+                                                        f"Добро пожаловать, {login}, пожалуйста, введите ваш пароль:")
+
+            if ok_pressed and check_password_hash(data[0][2], password):
+                self.flash('Успех', 'Вы успешно вошли в аккаут')
+                user.id = int(data[0][0])
+                user.login = data[0][1]
+                user.hashed_password = data[0][2]
+                user.is_admin = data[0][3]
+                self.check_status()
             else:
-                self.mbox.setWindowTitle('Ошибка')
-                self.mbox.setText('Неправильный логин.')
-                self.mbox.exec()
-        elif ok_pressed and login == '':
-            self.mbox.setWindowTitle('Ошибка')
-            self.mbox.setText('Пожалуйста, введите ваш логин.')
-            self.mbox.exec()
+                self.flash('Ошибка', 'Неверный пароль!')
+        else:
+            self.flash('Ошибка', 'Пользователь с таким логином не найден!')
+
+    def profile(self):
+        pass
+
+    def logout(self):
+        user.id = ''
+        user.login = ''
+        user.hashed_password = ''
+        user.is_admin = 0
+        self.check_status()
 
     def check_status(self):
-        if self.account[2] == 1:
-            self.AdminPB.show()
+        if user.login:
+            self.AccountStr.setText(f'Добро пожаловать, {user.login}')
+            self.RegisterPB.hide()
+            self.LoginPB.hide()
+            self.ProfilePB.show()
+            self.LogoutPB.show()
+            if user.is_admin == 1:
+                self.AdminPB.show()
         else:
+            self.AccountStr.setText(f'Добро пожаловать, гость')
+            self.RegisterPB.show()
+            self.LoginPB.show()
+            self.ProfilePB.hide()
+            self.LogoutPB.hide()
             self.AdminPB.hide()
 
 
+    def flash(self, title, content):
+        self.mbox.setWindowTitle(title)
+        self.mbox.setText(content)
+        self.mbox.exec()
+
+
 if __name__ == '__main__':
+    user = Account()
     app = QApplication(sys.argv)
     ex = Main()
     ex.show()
